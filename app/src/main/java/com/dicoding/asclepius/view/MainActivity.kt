@@ -1,34 +1,75 @@
 package com.dicoding.asclepius.view
 
-import android.Manifest
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
-import com.dicoding.asclepius.R
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import com.dicoding.asclepius.databinding.ActivityMainBinding
+import com.yalantis.ucrop.UCrop
+import java.io.File
+import java.util.Date
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityMainBinding
-
     private var currentImageUri: Uri? = null
-
+    private lateinit var binding: ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater).apply {
+            setContentView(root)
+            galleryButton.setOnClickListener { startGallery() }
+            analyzeButton.setOnClickListener { }
+        }
+
     }
 
     private fun startGallery() {
-        // TODO: Mendapatkan gambar dari Gallery.
+        galleryLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
     }
 
-    private fun showImage() {
-        // TODO: Menampilkan gambar sesuai Gallery yang dipilih.
+    private val galleryLauncher = registerForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            startCropper(uri)
+        } else {
+            Log.d("Image Picker", "No Image was Picked")
+        }
+    }
+
+    private val imageCropperLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { value ->
+        if (value.resultCode == Activity.RESULT_OK){
+            val resultValue = UCrop.getOutput(value.data!!)
+            if (resultValue != null){
+                currentImageUri = resultValue
+                binding.showImage()
+            }
+        }else if(value.resultCode == UCrop.RESULT_ERROR){
+            showToast("Error caused by : ${UCrop.getError(value.data!!)?.localizedMessage}")
+        }
+    }
+
+    private fun startCropper(uri: Uri) {
+        UCrop.of(uri, Uri.fromFile(File(cacheDir, "cropped_image_${Date().time}.jpg")))
+            .withAspectRatio(1f, 1f).getIntent(this).apply {
+                imageCropperLauncher.launch(this)
+            }
+    }
+
+    private fun ActivityMainBinding.showImage() {
+        currentImageUri?.let { uriValue ->
+            Log.d("Image URI", "get Image $uriValue")
+            previewImageView.setImageURI(uriValue)
+        }
     }
 
     private fun analyzeImage() {
-        // TODO: Menganalisa gambar yang berhasil ditampilkan.
     }
 
     private fun moveToResult() {
@@ -39,4 +80,5 @@ class MainActivity : AppCompatActivity() {
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
+
 }
