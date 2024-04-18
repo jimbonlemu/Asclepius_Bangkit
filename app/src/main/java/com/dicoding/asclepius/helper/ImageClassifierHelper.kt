@@ -1,6 +1,7 @@
 package com.dicoding.asclepius.helper
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
@@ -40,55 +41,41 @@ class ImageClassifierHelper(
     }
 
     private fun setupImageClassifier() {
-        val classifier = ImageClassifier.ImageClassifierOptions.builder()
-            .setScoreThreshold(imgThreshold)
-            .setMaxResults(imgMaxResults).setBaseOptions(
-                BaseOptions.builder()
-                    .setNumThreads(NUM_THREADS).build()
-            )
         try {
             imageClassifier = ImageClassifier.createFromFileAndOptions(
                 context,
                 mlModelName,
-                classifier.build()
+                ImageClassifier.ImageClassifierOptions.builder()
+                    .setScoreThreshold(imgThreshold)
+                    .setMaxResults(imgMaxResults).setBaseOptions(
+                        BaseOptions.builder()
+                            .setNumThreads(NUM_THREADS).build()
+                    ).build()
             )
         } catch (errorCaught: IllegalStateException) {
             mlResultHandler?.errorResult(context.getString(R.string.image_classifier_failed))
             Log.e(TAG, "${errorCaught.message}")
         }
-
     }
 
     fun classifyStaticImage(imageUri: Uri) {
         if (imageClassifier == null) {
             setupImageClassifier()
         }
+        val imageProcessor =
+            ImageProcessor.Builder().add(ResizeOp(224, 224, ResizeOp.ResizeMethod.NEAREST_NEIGHBOR))
+                .add(CastOp(DataType.FLOAT32)).build()
 
-        ImageProcessor.Builder().add(ResizeOp(224, 224, ResizeOp.ResizeMethod.NEAREST_NEIGHBOR))
-            .add(CastOp(DataType.FLOAT32)).build()
-
-        val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, imageUri))
         } else {
             @Suppress("DEPRECATION")
             MediaStore.Images.Media.getBitmap(context.contentResolver, imageUri)
-        }
-
-        bitmap.let {
-            val imageProcessor = ImageProcessor.Builder()
-                .add(ResizeOp(224, 224, ResizeOp.ResizeMethod.NEAREST_NEIGHBOR))
-                .add(CastOp(DataType.FLOAT32))
-                .build()
-                .process(TensorImage.fromBitmap(it))
-
-            val timeConsumption = SystemClock.uptimeMillis()
-            val results = imageClassifier?.classify(imageProcessor)
+        }.copy(Bitmap.Config.ARGB_8888, true)?.let { bitmap ->
             mlResultHandler?.successResult(
-                result = results, executionTime = timeConsumption
+                imageClassifier?.classify(imageProcessor.process(TensorImage.fromBitmap(bitmap))),
+                SystemClock.uptimeMillis()
             )
-        } ?: run {
-            Log.e(TAG, "Error decoding bitmap from URI.")
-            mlResultHandler?.errorResult("Error decoding bitmap from URI.")
         }
     }
 
