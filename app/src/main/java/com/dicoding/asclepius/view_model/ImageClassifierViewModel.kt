@@ -43,10 +43,8 @@ class ImageClassifierViewModel : ViewModel() {
                                 result?.let { resultValue ->
                                     if (resultValue.isNotEmpty() && resultValue[0].categories.isNotEmpty()) {
                                         _successResult.postValue(resultValue[0].categories.sortedByDescending { it.score })
-
                                     }
                                 }
-
                             }
                         })
                     classifyImage.classifyStaticImage(uri)
@@ -58,8 +56,6 @@ class ImageClassifierViewModel : ViewModel() {
                 Log.d("MainViewModel", e.message.toString())
                 _isLoading.postValue(false)
             }
-
-
         }
     }
 }

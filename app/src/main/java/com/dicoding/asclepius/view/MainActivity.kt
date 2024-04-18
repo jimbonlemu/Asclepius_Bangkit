@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
             analyzeButton.setOnClickListener {
                 currentImageUri?.let {
                     lifecycleScope.launch {
-                        analyze(it)
+                        analyzeImage(it)
                     }
                 } ?: showToast("Image not found")
             }
@@ -87,7 +87,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun ActivityMainBinding.analyze(uri: Uri) {
+    private suspend fun ActivityMainBinding.analyzeImage(uri: Uri) {
         with(imageClassifierViewModel) {
             analyzeImage(uri, this@MainActivity)
 
