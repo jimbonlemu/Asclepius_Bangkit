@@ -18,7 +18,7 @@ import com.dicoding.asclepius.utils.FIRST_SCORE_RESULT
 import com.dicoding.asclepius.utils.IMAGE_ARGUMENT
 import com.dicoding.asclepius.utils.SECOND_ANALYZE_LABEL_RESULT
 import com.dicoding.asclepius.utils.SECOND_SCORE_RESULT
-import com.dicoding.asclepius.view_model.MainViewModel
+import com.dicoding.asclepius.view_model.ImageClassifierViewModel
 import com.yalantis.ucrop.UCrop
 import kotlinx.coroutines.launch
 import org.tensorflow.lite.support.label.Category
@@ -29,7 +29,7 @@ import java.util.Date
 class MainActivity : AppCompatActivity() {
     private var currentImageUri: Uri? = null
     private lateinit var binding: ActivityMainBinding
-    private val mainViewModel: MainViewModel by viewModels<MainViewModel>()
+    private val imageClassifierViewModel: ImageClassifierViewModel by viewModels<ImageClassifierViewModel>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater).apply {
@@ -88,7 +88,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private suspend fun ActivityMainBinding.analyze(uri: Uri) {
-        with(mainViewModel) {
+        with(imageClassifierViewModel) {
             analyzeImage(uri, this@MainActivity)
 
             isLoading.observe(this@MainActivity) {

@@ -14,8 +14,7 @@ import kotlinx.coroutines.withContext
 import org.tensorflow.lite.support.label.Category
 import org.tensorflow.lite.task.vision.classifier.Classifications
 
-class MainViewModel(
-) : ViewModel() {
+class ImageClassifierViewModel : ViewModel() {
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
 
@@ -63,5 +62,4 @@ class MainViewModel(
 
         }
     }
-
 }
