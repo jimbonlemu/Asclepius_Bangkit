@@ -37,15 +37,15 @@ class MainActivity : AppCompatActivity() {
     private var currentImageUri: Uri? = null
     private lateinit var binding: ActivityMainBinding
     private val imageClassifierViewModel: ImageClassifierViewModel by viewModels<ImageClassifierViewModel>()
+    private val analyzeHistoryViewModel: AnalyzeHistoryViewModel by viewModels {
+        AnalyzeHistoryViewModelFactory.getInstanceOfAnalyzeHistoryViewModelFactory(this@MainActivity)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater).apply {
             setContentView(root)
             setupAppBar()
-
-            val analyzeHistoryViewModel: AnalyzeHistoryViewModel by viewModels {
-                AnalyzeHistoryViewModelFactory.getInstanceOfAnalyzeHistoryViewModelFactory(this@MainActivity)
-            }
             galleryButton.setOnClickListener { startGallery() }
             analyzeButton.setOnClickListener {
                 currentImageUri?.let {
