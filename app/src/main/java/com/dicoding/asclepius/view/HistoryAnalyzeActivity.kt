@@ -1,6 +1,7 @@
 package com.dicoding.asclepius.view
 
 import android.os.Bundle
+import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,13 +15,16 @@ class HistoryAnalyzeActivity : AppCompatActivity() {
     private val analyzeHistoryViewModel: AnalyzeHistoryViewModel by viewModels {
         AnalyzeHistoryViewModelFactory.getInstanceOfAnalyzeHistoryViewModelFactory(this@HistoryAnalyzeActivity)
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ActivityHistoryAnalyzeBinding.inflate(layoutInflater).apply {
             setContentView(root)
+            loaderHistory.visibility = View.VISIBLE
             analyzeHistoryViewModel.getAllAnalyzeHistory().observe(this@HistoryAnalyzeActivity) {
                 rvHistoryAnalyze.layoutManager = LinearLayoutManager(this@HistoryAnalyzeActivity)
                 rvHistoryAnalyze.adapter = AdapterHistoryAnalyzed(it, this@HistoryAnalyzeActivity)
+                loaderHistory.visibility = View.GONE
             }
         }
     }

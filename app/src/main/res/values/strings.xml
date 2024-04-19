@@ -6,6 +6,7 @@
     <string name="analyze">Analyze</string>
     <string name="result">Hasil Analisis</string>
     <string name="image_classifier_failed">Failed to initialize image classifier. Please check the error logs for more details.</string>
+    <string name="dark_mode">Dark Mode</string>
     <string name="history_analyzed">History Analyzed</string>
     <string name="setting">Setting</string>
     <string name="history_analyzed_image">History analyzed image</string>
