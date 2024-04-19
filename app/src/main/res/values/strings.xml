@@ -6,4 +6,10 @@
     <string name="analyze">Analyze</string>
     <string name="result">Hasil Analisis</string>
     <string name="image_classifier_failed">Failed to initialize image classifier. Please check the error logs for more details.</string>
+    <string name="history_analyzed">History Analyzed</string>
+    <string name="setting">Setting</string>
+    <string name="history_analyzed_image">History analyzed image</string>
+    <string name="title_category">Category: %s</string>
+    <string name="title_score">Confidence Score: %s</string>
+    <string name="title_time">Date: %s</string>
 </resources>

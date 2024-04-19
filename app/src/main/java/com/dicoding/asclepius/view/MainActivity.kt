@@ -12,19 +12,26 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
+import com.dicoding.asclepius.R
+import com.dicoding.asclepius.data.local.entity.EntityAnalyzeHistory
 import com.dicoding.asclepius.databinding.ActivityMainBinding
 import com.dicoding.asclepius.utils.FIRST_ANALYZE_LABEL_RESULT
 import com.dicoding.asclepius.utils.FIRST_SCORE_RESULT
 import com.dicoding.asclepius.utils.IMAGE_ARGUMENT
 import com.dicoding.asclepius.utils.SECOND_ANALYZE_LABEL_RESULT
 import com.dicoding.asclepius.utils.SECOND_SCORE_RESULT
+import com.dicoding.asclepius.view_model.AnalyzeHistoryViewModel
 import com.dicoding.asclepius.view_model.ImageClassifierViewModel
+import com.dicoding.asclepius.view_model_factory.AnalyzeHistoryViewModelFactory
 import com.yalantis.ucrop.UCrop
 import kotlinx.coroutines.launch
 import org.tensorflow.lite.support.label.Category
 import java.io.File
 import java.text.NumberFormat
+import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
     private var currentImageUri: Uri? = null
@@ -34,19 +41,49 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater).apply {
             setContentView(root)
+            setupAppBar()
+
+            val analyzeHistoryViewModel: AnalyzeHistoryViewModel by viewModels {
+                AnalyzeHistoryViewModelFactory.getInstanceOfAnalyzeHistoryViewModelFactory(this@MainActivity)
+            }
             galleryButton.setOnClickListener { startGallery() }
             analyzeButton.setOnClickListener {
                 currentImageUri?.let {
                     lifecycleScope.launch {
-                        analyzeImage(it)
+                        analyzeImage(it, analyzeHistoryViewModel)
                     }
                 } ?: showToast("Image not found")
             }
         }
     }
 
+    private fun ActivityMainBinding.setupAppBar() {
+        appBarAction.setOnMenuItemClickListener { itemClicked ->
+            when (itemClicked.itemId) {
+                R.id.menuToHistoryAnalyzed -> {
+                    startActivity(Intent(this@MainActivity, HistoryAnalyzeActivity::class.java))
+                    true
+                }
+
+                R.id.menuToSetting -> {
+                    startActivity(Intent(this@MainActivity, SettingActivity::class.java))
+                    true
+                }
+
+                else -> false
+            }
+        }
+    }
+
     private fun startGallery() {
         galleryLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+    }
+
+    private fun startCropper(uri: Uri) {
+        UCrop.of(uri, Uri.fromFile(File(cacheDir, "cropped_image_${Date().time}.jpg")))
+            .withAspectRatio(1f, 1f).getIntent(this).apply {
+                imageCropperLauncher.launch(this)
+            }
     }
 
     private val galleryLauncher = registerForActivityResult(
@@ -73,12 +110,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun startCropper(uri: Uri) {
-        UCrop.of(uri, Uri.fromFile(File(cacheDir, "cropped_image_${Date().time}.jpg")))
-            .withAspectRatio(1f, 1f).getIntent(this).apply {
-                imageCropperLauncher.launch(this)
-            }
-    }
 
     private fun ActivityMainBinding.showImage() {
         currentImageUri?.let { uriValue ->
@@ -87,7 +118,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun ActivityMainBinding.analyzeImage(uri: Uri) {
+    private suspend fun ActivityMainBinding.analyzeImage(
+        uri: Uri,
+        analyzeHistoryViewModel: AnalyzeHistoryViewModel
+    ) {
+
         with(imageClassifierViewModel) {
             analyzeImage(uri, this@MainActivity)
 
@@ -100,6 +135,19 @@ class MainActivity : AppCompatActivity() {
             }
 
             successResult.observe(this@MainActivity) {
+                it?.let {
+                    analyzeHistoryViewModel.insertAnalyzeHistory(
+                        EntityAnalyzeHistory(
+                            label = it[0].label.toString(),
+                            confidenceScore = formatNumberToPercent(it[0].score),
+                            image = uri.toString(),
+                            date = SimpleDateFormat(
+                                "dd/MM/yyyy HH:mm:ss",
+                                Locale.getDefault()
+                            ).format(Calendar.getInstance().time)
+                        )
+                    )
+                }
                 moveToResult(it)
             }
         }

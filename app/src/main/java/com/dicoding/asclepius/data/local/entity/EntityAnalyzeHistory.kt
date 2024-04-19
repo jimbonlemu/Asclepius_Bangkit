@@ -20,6 +20,9 @@ data class EntityAnalyzeHistory(
     val confidenceScore: String,
 
     @ColumnInfo(name = "image")
-    val image: String
+    val image: String,
+
+    @ColumnInfo(name = "date")
+    val date: String
 
 ) : Parcelable
