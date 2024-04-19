@@ -8,7 +8,7 @@
     tools:context=".view.SettingActivity">
 
     <com.google.android.material.switchmaterial.SwitchMaterial
-        android:id="@+id/btnSwitch"
+        android:id="@+id/btnSwitchTheme"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/dark_mode"

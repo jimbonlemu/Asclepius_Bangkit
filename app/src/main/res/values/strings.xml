@@ -13,4 +13,5 @@
     <string name="title_category">Category: %s</string>
     <string name="title_score">Confidence Score: %s</string>
     <string name="title_time">Date: %s</string>
+    <string name="image_description">Image place holder for analyze material</string>
 </resources>

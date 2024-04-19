@@ -19,6 +19,13 @@
             app:srcCompat="@drawable/ic_place_holder" />
 
         <TextView
+            android:id="@+id/result_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:text="@string/result" />
+
+        <TextView
             android:id="@+id/firstLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -13,5 +13,5 @@
         fun getAllAnalyzeHistory(): LiveData<List<EntityAnalyzeHistory>>
 
         @Insert(onConflict = OnConflictStrategy.IGNORE)
-        suspend fun insertAnalyzeHistory(cancerHistory: EntityAnalyzeHistory)
+        suspend fun insertAnalyzeHistory(entityAnalyzeHistory: EntityAnalyzeHistory)
     }
