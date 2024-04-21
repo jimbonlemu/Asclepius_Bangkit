@@ -13,5 +13,12 @@
     <string name="title_category">Category: %s</string>
     <string name="title_score">Confidence Score: %s</string>
     <string name="title_time">Date: %s</string>
-    <string name="image_description">Image place holder for analyze material</string>
+    <string name="preview_image_desc">Image place holder for analyze material</string>
+    <string name="image_result_desc">This image show the result of after analyzing process</string>
+    <string name="news_image_desc">This image show news image</string>
+    <string name="author">Author: %s</string>
+    <string name="history_page">History Page</string>
+    <string name="result_page">Result Page</string>
+    <string name="setting_page">Setting Page</string>
+    <string name="dummy_description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla euismod enim in sem varius rhoncus. Fusce interdum tortor vitae ullamcorper ultrices. Mauris vitae leo faucibus, volutpat arcu sed, ullamcorper eros. Fusce sed nunc non dui hendrerit vestibulum. In enim quam, pretium sed vehicula ut, tincidunt et leo. Phasellus pulvinar lectus lorem, sed euismod ex accumsan eget. Proin nulla nunc, molestie nec nulla vitae, semper fermentum eros. Fusce iaculis facilisis lorem. Integer fermentum mollis gravida. Nunc iaculis orci quam, ut ultricies libero commodo consectetur. Aenean sed dolor volutpat, scelerisque elit vel, tristique justo. Duis imperdiet interdum dui, ac convallis lorem pulvinar iaculis. Suspendisse purus sem, sollicitudin id pretium sit amet, congue eu turpis. Curabitur convallis venenatis quam, quis lobortis nibh facilisis at. In sagittis accumsan quam, accumsan pretium lacus pellentesque in.</string>
 </resources>

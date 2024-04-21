@@ -24,6 +24,7 @@ class ImageClassifierViewModel : ViewModel() {
     private val _successResult = MutableLiveData<List<Category>?>()
     val successResult: LiveData<List<Category>?> = _successResult
     suspend fun analyzeImage(uri: Uri, context: Context) {
+        _successResult.postValue(null)
         viewModelScope.launch {
             _isLoading.postValue(true)
             try {

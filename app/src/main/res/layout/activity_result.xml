@@ -11,10 +11,16 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <include
+            android:id="@+id/appBarLayout"
+            layout="@layout/layout_app_bar" />
+
         <ImageView
+            android:layout_marginTop="4dp"
             android:id="@+id/result_image"
             android:layout_width="match_parent"
             android:layout_height="400dp"
+            android:contentDescription="@string/image_result_desc"
             android:scaleType="fitCenter"
             app:srcCompat="@drawable/ic_place_holder" />
 
@@ -25,33 +31,18 @@
             android:layout_margin="16dp"
             android:text="@string/result" />
 
-        <TextView
-            android:id="@+id/firstLabel"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvNews"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:text="@string/result" />
+            android:layout_marginTop="4dp" />
 
-        <TextView
-            android:id="@+id/firstScore"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:text="@string/result" />
-
-        <TextView
-            android:id="@+id/secondLabel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:text="@string/result" />
-
-        <TextView
-            android:id="@+id/secondScore"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:text="@string/result" />
+        <ProgressBar
+            android:visibility="gone"
+            android:id="@+id/newsLoader"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center" />
 
     </LinearLayout>
 </ScrollView>

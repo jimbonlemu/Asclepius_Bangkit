@@ -45,7 +45,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_place_holder"
-        android:contentDescription="@string/image_description" />
+        android:contentDescription="@string/preview_image_desc" />
 
     <Button
         android:id="@+id/galleryButton"

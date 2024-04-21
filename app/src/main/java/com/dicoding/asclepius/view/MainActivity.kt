@@ -15,17 +15,14 @@ import androidx.lifecycle.lifecycleScope
 import com.dicoding.asclepius.R
 import com.dicoding.asclepius.data.local.entity.EntityAnalyzeHistory
 import com.dicoding.asclepius.databinding.ActivityMainBinding
-import com.dicoding.asclepius.utils.FIRST_ANALYZE_LABEL_RESULT
-import com.dicoding.asclepius.utils.FIRST_SCORE_RESULT
 import com.dicoding.asclepius.utils.IMAGE_ARGUMENT
-import com.dicoding.asclepius.utils.SECOND_ANALYZE_LABEL_RESULT
-import com.dicoding.asclepius.utils.SECOND_SCORE_RESULT
+import com.dicoding.asclepius.utils.LABEL_RESULT
+import com.dicoding.asclepius.utils.SCORE_RESULT
 import com.dicoding.asclepius.view_model.AnalyzeHistoryViewModel
 import com.dicoding.asclepius.view_model.ImageClassifierViewModel
 import com.dicoding.asclepius.view_model_factory.AnalyzeHistoryViewModelFactory
 import com.yalantis.ucrop.UCrop
 import kotlinx.coroutines.launch
-import org.tensorflow.lite.support.label.Category
 import java.io.File
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
@@ -134,8 +131,8 @@ class MainActivity : AppCompatActivity() {
                 showToast(it)
             }
 
-            successResult.observe(this@MainActivity) {
-                it?.let {
+            successResult.observe(this@MainActivity) { result ->
+                result?.let {
                     analyzeHistoryViewModel.insertAnalyzeHistory(
                         EntityAnalyzeHistory(
                             label = it[0].label.toString(),
@@ -147,8 +144,8 @@ class MainActivity : AppCompatActivity() {
                             ).format(Calendar.getInstance().time)
                         )
                     )
+                    moveToResult(it[0].label.toString(), formatNumberToPercent(it[0].score))
                 }
-                moveToResult(it)
             }
         }
     }
@@ -159,16 +156,16 @@ class MainActivity : AppCompatActivity() {
         analyzeButton.isEnabled = !isLoading
     }
 
-    private fun moveToResult(resultAnalyzed: List<Category>?) {
+    private fun moveToResult(
+        label: String,
+        confidenceScore: String
+    ) {
         val intent = Intent(this, ResultActivity::class.java)
         intent.apply {
-            resultAnalyzed?.let {
-                putExtra(IMAGE_ARGUMENT, currentImageUri.toString())
-                putExtra(FIRST_ANALYZE_LABEL_RESULT, it[0].label)
-                putExtra(FIRST_SCORE_RESULT, formatNumberToPercent(it[0].score))
-                putExtra(SECOND_ANALYZE_LABEL_RESULT, it[1].label)
-                putExtra(SECOND_SCORE_RESULT, formatNumberToPercent(it[1].score))
-            }
+            putExtra(IMAGE_ARGUMENT, currentImageUri.toString())
+            putExtra(LABEL_RESULT, label)
+            putExtra(SCORE_RESULT, confidenceScore)
+
         }
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
         startActivity(intent)
