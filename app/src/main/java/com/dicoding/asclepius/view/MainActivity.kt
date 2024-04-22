@@ -11,18 +11,21 @@ import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.lifecycle.lifecycleScope
 import com.dicoding.asclepius.R
 import com.dicoding.asclepius.data.local.entity.EntityAnalyzeHistory
 import com.dicoding.asclepius.databinding.ActivityMainBinding
+import com.dicoding.asclepius.helper.ImageClassifierHelper
 import com.dicoding.asclepius.utils.IMAGE_ARGUMENT
 import com.dicoding.asclepius.utils.LABEL_RESULT
 import com.dicoding.asclepius.utils.SCORE_RESULT
 import com.dicoding.asclepius.view_model.AnalyzeHistoryViewModel
-import com.dicoding.asclepius.view_model.ImageClassifierViewModel
 import com.dicoding.asclepius.view_model_factory.AnalyzeHistoryViewModelFactory
 import com.yalantis.ucrop.UCrop
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.tensorflow.lite.task.vision.classifier.Classifications
 import java.io.File
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
@@ -33,7 +36,7 @@ import java.util.Locale
 class MainActivity : AppCompatActivity() {
     private var currentImageUri: Uri? = null
     private lateinit var binding: ActivityMainBinding
-    private val imageClassifierViewModel: ImageClassifierViewModel by viewModels<ImageClassifierViewModel>()
+
     private val analyzeHistoryViewModel: AnalyzeHistoryViewModel by viewModels {
         AnalyzeHistoryViewModelFactory.getInstanceOfAnalyzeHistoryViewModelFactory(this@MainActivity)
     }
@@ -46,9 +49,7 @@ class MainActivity : AppCompatActivity() {
             galleryButton.setOnClickListener { startGallery() }
             analyzeButton.setOnClickListener {
                 currentImageUri?.let {
-                    lifecycleScope.launch {
-                        analyzeImage(it, analyzeHistoryViewModel)
-                    }
+                    analyzeImage(it, analyzeHistoryViewModel)
                 } ?: showToast("Image not found")
             }
         }
@@ -107,7 +108,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     private fun ActivityMainBinding.showImage() {
         currentImageUri?.let { uriValue ->
             Log.d("Image URI", "get Image $uriValue")
@@ -115,40 +115,75 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun ActivityMainBinding.analyzeImage(
-        uri: Uri,
+    private fun ActivityMainBinding.analyzeImage(
+        uriImage: Uri,
         analyzeHistoryViewModel: AnalyzeHistoryViewModel
     ) {
+        CoroutineScope(Dispatchers.Main).launch {
+            isProgressBarEnabled(true)
+            var entityHistory =
+                EntityAnalyzeHistory(label = "", confidenceScore = "", image = "", date = "")
+            try {
+                withContext(Dispatchers.IO) {
+                    val imageClassifierHelper = ImageClassifierHelper(context = this@MainActivity,
+                        mlResultHandler = object : ImageClassifierHelper.MlResultHandler {
+                            override fun errorResult(result: String) {
+                                showToast("Error: $result")
+                            }
 
-        with(imageClassifierViewModel) {
-            analyzeImage(uri, this@MainActivity)
+                            override fun successResult(
+                                result: List<Classifications>?,
+                                executionTime: Long
+                            ) {
+                                result?.let { listClassification ->
+                                    if (listClassification.isNotEmpty() && listClassification[0].categories.isNotEmpty()) {
+                                        val sortedCategories =
+                                            listClassification[0].categories.sortedByDescending { it?.score }
+                                        entityHistory = EntityAnalyzeHistory(
+                                            label = sortedCategories[0].label,
+                                            confidenceScore = formatNumberToPercent(sortedCategories[0].score),
+                                            image = uriImage.toString(),
+                                            date = SimpleDateFormat(
+                                                "dd/MM/yyyy HH:mm:ss",
+                                                Locale.getDefault()
+                                            ).format(Calendar.getInstance().time)
 
-            isLoading.observe(this@MainActivity) {
-                isProgressBarEnabled(it)
-            }
+                                        )
+                                        moveToResult(
+                                            sortedCategories[0].label,
+                                            formatNumberToPercent(sortedCategories[0].score)
+                                        )
+                                    }
+                                }
+                            }
 
-            errorResult.observe(this@MainActivity) {
-                showToast(it)
-            }
+                        })
 
-            successResult.observe(this@MainActivity) { result ->
-                result?.let {
-                    analyzeHistoryViewModel.insertAnalyzeHistory(
-                        EntityAnalyzeHistory(
-                            label = it[0].label.toString(),
-                            confidenceScore = formatNumberToPercent(it[0].score),
-                            image = uri.toString(),
-                            date = SimpleDateFormat(
-                                "dd/MM/yyyy HH:mm:ss",
-                                Locale.getDefault()
-                            ).format(Calendar.getInstance().time)
-                        )
-                    )
-                    moveToResult(it[0].label.toString(), formatNumberToPercent(it[0].score))
+                    imageClassifierHelper.classifyStaticImage(uriImage)
+                    analyzeHistoryViewModel.insertAnalyzeHistory(entityHistory)
+                    withContext(Dispatchers.Main) {
+                        isProgressBarEnabled(false)
+                    }
                 }
+            } catch (e: Exception) {
+                Log.d("MainActivity", e.message.toString())
             }
         }
     }
+
+    private fun moveToResult(
+        label: String,
+        confidenceScore: String
+    ) {
+        Log.d("MainActivity", "Move to Result: Label=$label, Confidence Score=$confidenceScore")
+        val intent = Intent(this, ResultActivity::class.java).apply {
+            putExtra(IMAGE_ARGUMENT, currentImageUri.toString())
+            putExtra(LABEL_RESULT, label)
+            putExtra(SCORE_RESULT, confidenceScore)
+        }
+        startActivity(intent)
+    }
+
 
     private fun ActivityMainBinding.isProgressBarEnabled(isLoading: Boolean) {
         progressIndicator.visibility = if (isLoading) View.VISIBLE else View.GONE
@@ -156,20 +191,6 @@ class MainActivity : AppCompatActivity() {
         analyzeButton.isEnabled = !isLoading
     }
 
-    private fun moveToResult(
-        label: String,
-        confidenceScore: String
-    ) {
-        val intent = Intent(this, ResultActivity::class.java)
-        intent.apply {
-            putExtra(IMAGE_ARGUMENT, currentImageUri.toString())
-            putExtra(LABEL_RESULT, label)
-            putExtra(SCORE_RESULT, confidenceScore)
-
-        }
-        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-        startActivity(intent)
-    }
 
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
