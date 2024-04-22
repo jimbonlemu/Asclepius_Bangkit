@@ -20,18 +20,18 @@ class NewsViewModel : ViewModel() {
     val isLoadingNewsData: LiveData<Boolean> = _isLoadingNewsData
 
     init {
-
+        getNewsResponse()
     }
 
     private fun getNewsResponse() {
-        _isLoadingNewsData.postValue(true)
+        _isLoadingNewsData.value = true
         NetworkConfig.getNetworkService().getNewsResponse().enqueue(
             object : Callback<NewsResponse> {
                 override fun onResponse(
                     call: Call<NewsResponse>,
                     response: Response<NewsResponse>
                 ) {
-                    _isLoadingNewsData.postValue(false)
+                    _isLoadingNewsData.value = false
                     if (response.isSuccessful) {
                         _listOfNews.value = response.body()?.articles
                     } else {
@@ -41,7 +41,7 @@ class NewsViewModel : ViewModel() {
                 }
 
                 override fun onFailure(call: Call<NewsResponse>, t: Throwable) {
-                    _isLoadingNewsData.postValue(false)
+                    _isLoadingNewsData.value = false
                     Log.e("NewsViewModel", t.message.toString())
                 }
 
