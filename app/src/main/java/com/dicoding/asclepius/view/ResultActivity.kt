@@ -31,8 +31,7 @@ class ResultActivity : AppCompatActivityWithActionBack() {
     private fun ActivityResultBinding.setResultAnalyze() {
         resultImage.setImageURI(intent.getStringExtra(IMAGE_ARGUMENT)?.toUri())
         resultText.text = getString(R.string.title_category, intent.getStringExtra(LABEL_RESULT))
-        tvConfidenceScore.text =
-            getString(R.string.title_score, intent.getStringExtra(SCORE_RESULT))
+        tvConfidenceScore.text = getString(R.string.title_score, intent.getStringExtra(SCORE_RESULT))
     }
 
     private fun ActivityResultBinding.getAllNews() {

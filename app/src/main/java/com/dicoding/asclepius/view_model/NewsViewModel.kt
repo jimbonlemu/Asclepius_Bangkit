@@ -19,6 +19,9 @@ class NewsViewModel : ViewModel() {
     private var _isLoadingNewsData = MutableLiveData<Boolean>()
     val isLoadingNewsData: LiveData<Boolean> = _isLoadingNewsData
 
+    private var _errorResult = MutableLiveData<String>()
+    val errorResult: LiveData<String> = _errorResult
+
     init {
         getNewsResponse()
     }
@@ -35,7 +38,7 @@ class NewsViewModel : ViewModel() {
                     if (response.isSuccessful) {
                         _listOfNews.value = response.body()?.articles
                     } else {
-                        Log.e("NewsViewModel", response.message())
+                        _errorResult.value = "Something went wrong while fetching data"
                     }
 
                 }
@@ -43,6 +46,7 @@ class NewsViewModel : ViewModel() {
                 override fun onFailure(call: Call<NewsResponse>, t: Throwable) {
                     _isLoadingNewsData.value = false
                     Log.e("NewsViewModel", t.message.toString())
+                    _errorResult.value = "Something went wrong while fetching data"
                 }
 
             }
