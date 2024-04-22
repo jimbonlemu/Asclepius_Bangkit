@@ -9,6 +9,7 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
 import com.dicoding.asclepius.R
 import com.dicoding.asclepius.databinding.ActivityEntryBinding
+import com.dicoding.asclepius.utils.SPLASH_SCREEN_DURATION
 import com.dicoding.asclepius.utils.ThemeSettingPreference
 import com.dicoding.asclepius.utils.datastore
 import kotlinx.coroutines.delay
@@ -35,7 +36,8 @@ class EntryActivity : AppCompatActivity() {
     }
 
     private fun initDarkMode() {
-        ThemeSettingPreference.getInstanceOfThemeSettingPreference(application.datastore).getSavedThemeSetting().asLiveData()
+        ThemeSettingPreference.getInstanceOfThemeSettingPreference(application.datastore)
+            .getSavedThemeSetting().asLiveData()
             .observe(this) { darkModeActive ->
                 val setMode =
                     if (darkModeActive) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
@@ -43,7 +45,4 @@ class EntryActivity : AppCompatActivity() {
             }
     }
 
-    companion object {
-        const val SPLASH_SCREEN_DURATION = 3
-    }
 }

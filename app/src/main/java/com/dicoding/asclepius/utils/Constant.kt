@@ -6,6 +6,8 @@ const val NEWS_LANGUAGE = "en"
 const val NEWS_CATEGORY = "health"
 const val NEWS_QUERY = "Cancer"
 
+const val SPLASH_SCREEN_DURATION = 3
+
 const val THEME_SETTING_PREFERENCE = "theme_setting_preference"
 const val THEME_SETTING_KEY = "theme_setting_key"
 

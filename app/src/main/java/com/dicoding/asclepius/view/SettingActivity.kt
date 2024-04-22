@@ -2,7 +2,6 @@ package com.dicoding.asclepius.view
 
 import android.os.Bundle
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import com.dicoding.asclepius.R
 import com.dicoding.asclepius.databinding.ActivitySettingBinding
