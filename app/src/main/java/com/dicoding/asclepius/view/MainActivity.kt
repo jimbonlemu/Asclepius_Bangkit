@@ -46,12 +46,8 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater).apply {
             setContentView(root)
             setupAppBar()
-            galleryButton.setOnClickListener { startGallery() }
-            analyzeButton.setOnClickListener {
-                currentImageUri?.let {
-                    analyzeImage(it, analyzeHistoryViewModel)
-                } ?: showToast("Image not found")
-            }
+            buttonActionOnClick(analyzeHistoryViewModel)
+
         }
     }
 
@@ -70,6 +66,19 @@ class MainActivity : AppCompatActivity() {
 
                 else -> false
             }
+        }
+    }
+
+    private fun ActivityMainBinding.buttonActionOnClick(
+        analyzeHistoryViewModel: AnalyzeHistoryViewModel
+    ) {
+        galleryButton.setOnClickListener {
+            startGallery()
+        }
+        analyzeButton.setOnClickListener {
+            currentImageUri?.let { it1 -> analyzeImage(it1, analyzeHistoryViewModel) } ?: showToast(
+                "Image Not Found"
+            )
         }
     }
 
@@ -110,7 +119,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun ActivityMainBinding.showImage() {
         currentImageUri?.let { uriValue ->
-            Log.d("Image URI", "get Image $uriValue")
             previewImageView.setImageURI(uriValue)
         }
     }
@@ -125,7 +133,7 @@ class MainActivity : AppCompatActivity() {
                 EntityAnalyzeHistory(label = "", confidenceScore = "", image = "", date = "")
             try {
                 withContext(Dispatchers.IO) {
-                    val imageClassifierHelper = ImageClassifierHelper(context = this@MainActivity,
+                    ImageClassifierHelper(context = this@MainActivity,
                         mlResultHandler = object : ImageClassifierHelper.MlResultHandler {
                             override fun errorResult(result: String) {
                                 showToast("Error: $result")
@@ -157,9 +165,7 @@ class MainActivity : AppCompatActivity() {
                                 }
                             }
 
-                        })
-
-                    imageClassifierHelper.classifyStaticImage(uriImage)
+                        }).classifyStaticImage(uriImage)
                     analyzeHistoryViewModel.insertAnalyzeHistory(entityHistory)
                     withContext(Dispatchers.Main) {
                         isProgressBarEnabled(false)

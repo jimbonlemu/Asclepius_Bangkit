@@ -15,7 +15,6 @@ class AdapterHistoryAnalyzed(
 ) : RecyclerView.Adapter<AdapterHistoryAnalyzed.ListViewHolder>() {
     class ListViewHolder(val binding: ItemHistoryAnalyzeBinding) :
         RecyclerView.ViewHolder(binding.root)
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListViewHolder {
         return ListViewHolder(
             ItemHistoryAnalyzeBinding.inflate(
