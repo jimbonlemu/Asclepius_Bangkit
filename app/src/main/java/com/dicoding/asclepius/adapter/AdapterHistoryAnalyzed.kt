@@ -30,11 +30,11 @@ class AdapterHistoryAnalyzed(
     override fun onBindViewHolder(holder: ListViewHolder, position: Int) {
         listHistoryAnalyzed.reversed()[position].apply {
             with(holder.binding) {
-                Glide.with(root).load(image).into(ivHistoryAnalyzed)
+                Glide.with(root).load(image).into(ivHistoryImage)
                 with(context.resources) {
-                    tvLabelHistoryAnalyzed.text = getString(R.string.title_category, label)
-                    tvScoreHistoryAnalyzed.text = getString(R.string.title_score, confidenceScore)
-                    tvDateHistoryAnalyzed.text = getString(R.string.title_time, date)
+                    tvLabelResult.text = getString(R.string.title_category, label)
+                    tvConfidenceResult.text = getString(R.string.title_score, confidenceScore)
+//                    tvDateHistoryAnalyzed.text = getString(R.string.title_time, date)
                 }
             }
         }
