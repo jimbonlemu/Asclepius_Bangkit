@@ -42,15 +42,17 @@ class ImageClassifierHelper(
 
     private fun setupImageClassifier() {
         try {
+
+           val  imageOptions =ImageClassifier.ImageClassifierOptions.builder()
+               .setScoreThreshold(imgThreshold)
+               .setMaxResults(imgMaxResults).setBaseOptions(
+                   BaseOptions.builder()
+                       .setNumThreads(NUM_THREADS).build()
+               ).build()
             imageClassifier = ImageClassifier.createFromFileAndOptions(
                 context,
                 mlModelName,
-                ImageClassifier.ImageClassifierOptions.builder()
-                    .setScoreThreshold(imgThreshold)
-                    .setMaxResults(imgMaxResults).setBaseOptions(
-                        BaseOptions.builder()
-                            .setNumThreads(NUM_THREADS).build()
-                    ).build()
+                imageOptions
             )
         } catch (errorCaught: IllegalStateException) {
             mlResultHandler?.errorResult(context.getString(R.string.image_classifier_failed))
