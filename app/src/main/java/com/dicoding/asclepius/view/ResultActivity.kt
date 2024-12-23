@@ -40,7 +40,7 @@ class ResultActivity : AppCompatActivityWithActionBack() {
                 if (it != null) {
                     val filteredData = it.filter { articlesItem ->
                         articlesItem.author != null
-                    }
+                    }   
                     setAdapterNewsData(filteredData)
                 }
             }
