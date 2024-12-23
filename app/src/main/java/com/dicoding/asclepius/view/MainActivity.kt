@@ -87,7 +87,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startCropper(uri: Uri) {
-        UCrop.of(uri, Uri.fromFile(File(cacheDir, "cropped_image_${Date().time}.jpg")))
+
+        val fileName = "image_cropped_${Date().time}.jpg"
+        val destination = Uri.fromFile(File(cacheDir, fileName))
+
+        UCrop.of(uri, destination)
             .withAspectRatio(1f, 1f).getIntent(this).apply {
                 imageCropperLauncher.launch(this)
             }
@@ -129,11 +133,10 @@ class MainActivity : AppCompatActivity() {
     ) {
         CoroutineScope(Dispatchers.Main).launch {
             isProgressBarEnabled(true)
-            var entityHistory =
-                EntityAnalyzeHistory(label = "", confidenceScore = "", image = "", date = "")
             try {
                 withContext(Dispatchers.IO) {
-                    ImageClassifierHelper(context = this@MainActivity,
+                    ImageClassifierHelper(
+                        context = this@MainActivity,
                         mlResultHandler = object : ImageClassifierHelper.MlResultHandler {
                             override fun errorResult(result: String) {
                                 showToast("Error: $result")
@@ -147,41 +150,41 @@ class MainActivity : AppCompatActivity() {
                                     if (listClassification.isNotEmpty() && listClassification[0].categories.isNotEmpty()) {
                                         val sortedCategories =
                                             listClassification[0].categories.sortedByDescending { it?.score }
-                                        entityHistory = EntityAnalyzeHistory(
+                                        val entityHistory = EntityAnalyzeHistory(
                                             label = sortedCategories[0].label,
-                                            confidenceScore = formatNumberToPercent(sortedCategories[0].score),
+                                            confidenceScore = NumberFormat.getPercentInstance()
+                                                .format(sortedCategories[0].score),
                                             image = uriImage.toString(),
                                             date = SimpleDateFormat(
                                                 "dd/MM/yyyy HH:mm:ss",
                                                 Locale.getDefault()
                                             ).format(Calendar.getInstance().time)
-
                                         )
                                         moveToResult(
                                             sortedCategories[0].label,
-                                            formatNumberToPercent(sortedCategories[0].score)
+                                            NumberFormat.getPercentInstance()
+                                                .format(sortedCategories[0].score)
                                         )
+                                        analyzeHistoryViewModel.insertAnalyzeHistory(entityHistory)
                                     }
                                 }
                             }
-
-                        }).classifyStaticImage(uriImage)
-                    analyzeHistoryViewModel.insertAnalyzeHistory(entityHistory)
-                    withContext(Dispatchers.Main) {
-                        isProgressBarEnabled(false)
-                    }
+                        }
+                    ).classifyStaticImage(uriImage)
                 }
             } catch (e: Exception) {
                 Log.d("MainActivity", e.message.toString())
+            } finally {
+                isProgressBarEnabled(false)
             }
         }
     }
+
 
     private fun moveToResult(
         label: String,
         confidenceScore: String
     ) {
-        Log.d("MainActivity", "Move to Result: Label=$label, Confidence Score=$confidenceScore")
         val intent = Intent(this, ResultActivity::class.java).apply {
             putExtra(IMAGE_ARGUMENT, currentImageUri.toString())
             putExtra(LABEL_RESULT, label)
@@ -201,8 +204,5 @@ class MainActivity : AppCompatActivity() {
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
-
-    private fun formatNumberToPercent(score: Float): String =
-        NumberFormat.getPercentInstance().format(score)
 
 }
